@@ -1,2 +1,2 @@
 # temp-convert
-Command-line tool for converting temperatures
+Program for converting between temperatures in Celsius, Fahrenheit and Kelvin.
