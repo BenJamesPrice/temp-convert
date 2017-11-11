@@ -5,6 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdbool.h>
+#include <assert.h>
+#include <math.h>
 
 // Integer constants representing which conversion to take place
 enum { CF, FC, CK, KC, FK, KF, Invalid };
@@ -13,12 +15,14 @@ enum { CF, FC, CK, KC, FK, KF, Invalid };
 double celsiusToFahrenheit(double temp) {
     temp = temp * 1.8;
     temp = temp + 32;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
 // Converts celsius to kelvin
 double celsiusToKelvin(double temp) {
     temp = temp + 273.0;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
@@ -26,26 +30,36 @@ double celsiusToKelvin(double temp) {
 double fahrenheitToCelsius(double temp) {
     temp = temp - 32.0;
     temp = temp / 1.8;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
 // Converts fahrenheit to kelvin
 double fahrenheitToKelvin(double temp) {
-    temp = fahrenheitToCelsius(temp);
-    temp = celsiusToKelvin(temp);
+    temp = temp - 32.0;
+    temp = temp / 1.8;
+    //temp = fahrenheitToCelsius(temp);
+    //temp = celsiusToKelvin(temp);
+    temp = temp + 273.0;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
 // Converts kelvin to celsius
 double kelvinToCelsius(double temp) {
     temp = temp - 273.0;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
 // Converts kelvin to fahrenheit
 double kelvinToFahrenheit(double temp) {
-    temp = kelvinToCelsius(temp);
-    temp = celsiusToFahrenheit(temp);
+    //temp = kelvinToCelsius(temp);
+    temp = temp - 273.0;
+    //temp = celsiusToFahrenheit(temp);
+    temp = temp * 1.8;
+    temp = temp + 32;
+    temp = round(temp * 10.0)/10.0;
     return temp;
 }
 
@@ -123,10 +137,38 @@ void convert(int n, const char current[], int m, const char new[]) {
     }
 }
 
+
+void testScaleType() {
+    assert(scaleType(2, "0C", 1, "F") == CF);
+    assert(scaleType(2, "0C", 1, "K") == CK);
+    assert(scaleType(2, "0K", 1, "F") == KF);
+    assert(scaleType(2, "0K", 1, "C") == KC);
+    assert(scaleType(2, "0F", 1, "C") == FC);
+    assert(scaleType(2, "0F", 1, "K") == FK);
+    assert(scaleType(2, "0C", 1, "C") == Invalid);
+}
+
+void testTempConversions() {
+    assert(celsiusToKelvin(0.0) == 273.0);
+    assert(celsiusToFahrenheit(21.0) == 69.8);
+    assert(fahrenheitToCelsius(46.4) == 8.0);
+    assert(fahrenheitToKelvin(23.5) == 268.3);
+    assert(kelvinToCelsius(305.0) == 32.0);
+    assert(kelvinToFahrenheit(305.0) == 89.6);
+}
+
+// Tests the program with a variety of inputs
+void test() {
+    testScaleType();
+    testTempConversions();
+    printf("All tests pass\n");
+}
+
 // Handles input. Prints an error if there are an incorrect number of arguments
 // Example input: 60C F
 int main(int n, char *args[n]) {
-    if (n == 3) convert(strlen(args[1]), args[1], strlen(args[2]), args[2]);
+    if (n == 2 && strcmp(args[1],"-t") ==  0) test();
+    else if (n == 3) convert(strlen(args[1]), args[1], strlen(args[2]), args[2]);
     else printf("Invalid input.\n");
     return 0;
 }
